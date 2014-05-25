@@ -1,0 +1,5 @@
+
+- C64 and C128 versions of PC-Joy driver and calibrator should be merged 
+  into one file with conditional assembly in few places
+- they should be optimized or even rewritten from scratch
+- look at geomakedir.tas TODO header

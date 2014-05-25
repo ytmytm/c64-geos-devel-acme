@@ -1,0 +1,1083 @@
+
+; GeoMakeDir v2.0 - VIII '97
+; GeoMakeDir v2.1 - 25 XI '97, 30 XII '97, 4-5, 7 I '98, 23-24 II '98
+; 22 II '98 - lost part of source, resurrected 23 II '98
+; 29 VI, 1 VII '98
+; v2.1: 40/80 col, fixed 4 drives bug, fixed DirSwapper for GEOS 128, 
+;	new opt.: renameDir, changeDir, convertDir, logo, switch 40/80
+; v2.2: commercial try, changed logo and  texts
+
+;12.06.1999 - source w wersji cross-assembler
+;to do: dolaczyc 3 bitmapy w binarkach (ikona, logo, DRIVE)
+
+;29.11.1999 - GNU ACME port start
+
+;TODO - look for ';!!!'
+;     - apply more macros
+
+
+maxDesks = 8
+
+LogoPic
+;!!!
+;;;;;;;;;;;;;;;;;;
+;; logo picture here!!!
+;;;;;;;;;;;;;;;;;;
+LogoW =0
+LogoH =0
+;LogoW = .x
+;LogoH = .y
+;!!!
+;size here!!!
+;;;;;;;;;;;;;;;;;
+
+DrvIcDat	!word DrvIconPic
+		!word 0
+DrvIcWidth	!byte DrvW | DOUBLE_B
+		!byte DrvH
+		!word DoDrvIc
+DrvIconPic
+
+;!!!
+;;;;;;;;;;;;;
+;; drive icon picture here!
+;;;;;;;;;;;;;
+DrvW=0
+DrvH=0
+;!!!
+;;; icon size here!
+;;;;;;;;;;;;;;;;;;;;
+
+Daty		!byte 0,17,34,51,68,85,102,119
+Dane		!word 0
+
+DASpace		!fill 137, NULL
+
+SDVers		!byte "2"
+DiskName	!fill 17, NULL
+NewDirName	!fill 17, NULL
+SubDirName	!fill 17, NULL
+
+SubDirClass	!text "GeoMakeDir  V2.",0
+
+SubDane		!byte $c0 | USR
+SubTr		!word 0
+		!text ".."
+		!byte $a0,$a0,$a0,$a0,$a0,$a0,$a0
+		!byte $a0,$a0,$a0,$a0,$a0,$a0,$a0
+SubHdrTr	!word 0
+		!byte SEQUENTIAL
+		!byte DESK_ACC
+
+SubDirHeader
+		!word SubDirName
+		!byte 3, 21
+;j
+;!!!
+;;;;;;;;;;;;;;;
+;; icon picture here!!!!
+;;;;;;;;;;;;;;;
+
+
+		!byte $c0 | USR
+		!byte DESK_ACC
+		!byte SEQUENTIAL
+		!word DirMove
+		!word DirMoveEnd
+		!word DirMove
+		!text "GeoMakeDir  V2.2",0,0,0,$40
+		!text "Maciej Witkowiak", 0
+		!fill O_GHINFO_TXT - O_GH_AUTHOR - 17, NULL
+		!text "This is dir-swapper.", 0
+
+
+DR_DBox		!byte DEF_DB_POS | 1
+		!byte DBTXTSTR, (DBI_X_2 * 8)-6, 10
+		!word OnDiskTxt
+		!byte DBTXTSTR, (DBI_X_2 * 8)-6, 10+10
+		!word DiskName
+		!byte DBGETFILES, 4, 4
+		!byte OPEN, DBI_X_2, DBI_Y_0+16
+		!byte DISK, DBI_X_2, DBI_Y_0+32+1
+		!byte CANCEL, DBI_X_2, DBI_Y_0+64+3
+DrvIc2OnOff	!byte DBUSRICON, DBI_X_2, DBI_Y_0+48+2
+		!word DrvIcDat
+		!byte NULL
+
+OnDiskTxt	!text BOLDON, "On disk:", PLAINTEXT, NULL
+PleaseEnter	!text BOLDON, "Please enter the subdir's name:", PLAINTEXT, NULL
+
+db		!byte  DEF_DB_POS | 1
+		!byte  DBTXTSTR, $10, $10
+		!word t1
+		!byte  DBTXTSTR, $10, $10+12
+		!word t2
+		!byte  DBTXTSTR, $10, $10+24+5
+		!word t3
+		!byte  DBTXTSTR, $10, $10+36+5
+		!word t4
+		!byte  CANCEL, DBI_X_2, DBI_Y_2
+		!byte  OK, DBI_X_0, DBI_Y_2
+		!byte  NULL
+t1		!text BOLDON, "GeoMakeDir v2.2   (1997/1998)",0
+t2		!text "by Maciej 'YTM' Witkowiak",0
+t3		!text "GeoMakeDir logo",0
+t4		!text "by Szymon 'Zyga' Zygmanski",PLAINTEXT,0
+
+About1
+		!byte $00 | 1
+		!byte 20, 180
+Ab1		!word 0
+Ab2		!word 310
+		!byte DBTXTSTR, 10, 10
+		!word Ab1Txt1
+		!byte DBTXTSTR, 10, 20
+		!word Ab1Txt2
+		!byte DBTXTSTR, 10, 30
+		!word Ab1Txt3
+		!byte DBTXTSTR, 10, 40
+		!word Ab1Txt4
+		!byte DBTXTSTR, 10, 50
+		!word Ab1Txt5
+		!byte DBTXTSTR, 10, 60
+		!word Ab1Txt6
+		!byte DBTXTSTR, 10, 70
+		!word Ab1Txt7
+		!byte DBTXTSTR, 10, 80
+		!word Ab1Te7
+		!byte DBTXTSTR, 10, 90
+		!word Ab1Txt8
+		!byte DBTXTSTR, 10, 100
+		!word Ab1Txt9
+		!byte DBTXTSTR, 10, 110
+		!word Ab1Txt10
+		!byte DBTXTSTR, 80, 120
+		!word Ab1Txt11
+		!byte DBTXTSTR, 80, 130
+		!word Ab1Txt12
+		!byte DBTXTSTR, 80, 140
+		!word Ab1Txt13
+		!byte DBTXTSTR, 80, 150
+		!word Ab1Txt14
+		!byte OK, 30, 140
+		!byte NULL
+Ab1Txt1		!text BOLDON, "This program will allo!word you to create subdirectories",0
+Ab1Txt2		!text BOLDON, "on 1541/70/71 and all RAM Drives that are emulating",0
+Ab1Txt3		!text BOLDON, "those devices. It supports all four drives.",0
+Ab1Txt4		!text BOLDON, "To change directory simply double click on its icon.",0
+Ab1Txt5		!text BOLDON, ULINEON, OUTLINEON, "Important!", PLAINTEXT,0
+Ab1Txt6		!text BOLDON, "Do not use Validate! You can lose files from other",0
+Ab1Txt7		!text BOLDON, "directories. When changing directory on C-64 you can",0
+Ab1Te7		!text BOLDON, "have only 7 files on the border. Remember: only 7!",0
+Ab1Txt8		!text BOLDON, "Read the docs.",0
+Ab1Txt9		!text BOLDON, "If you want to contact with me for some reason",0
+Ab1Txt10	!text BOLDON, "try this addy:",0
+Ab1Txt11	!text BOLDON, "Maciej Witkowiak",0
+Ab1Txt12	!text BOLDON, "ul. Slowackiego 6/57",0
+Ab1Txt13	!text BOLDON, "77-400 ZLOTOW",0
+Ab1Txt14	!text BOLDON, "POLAND",0
+
+
+DRen_DBox	!byte DEF_DB_POS | 1
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_2_Y
+		!word RenameDB
+		!byte DBGETSTRING, TXT_LN_X, TXT_LN_3_Y
+		!byte a8L
+		!byte 16
+		!byte CANCEL, DBI_X_2, DBI_Y_2
+		!byte NULL
+RenameDB	!text BOLDON, "Please enter new name:",PLAINTEXT,0
+
+DRen_DB		!byte DEF_DB_POS | 1
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_1_Y
+		!word DRenTxt1
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_2_Y
+		!word DRenTxt2
+		!byte OK, DBI_X_2, DBI_Y_2
+		!byte NULL
+DRenTxt1	!text BOLDON, "You shouldn't try to rename", NULL
+DRenTxt2	!text "the shadow of higher directory.",PLAINTEXT,0
+
+
+NtV20Par	!byte DEF_DB_POS | 1
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_1_Y
+		!word NtTxt1
+		!byte OK, DBI_X_2, DBI_Y_2
+		!byte NULL
+NtTxt1		!text BOLDON, "Dir-swappers v2.0 only.",PLAINTEXT,0
+
+CR_DBox		!byte DEF_DB_POS | 1
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_1_Y
+		!word OnDiskTxt
+		!byte DBTXTSTR, 66, TXT_LN_1_Y
+		!word DiskName
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_2_Y
+		!word PleaseEnter
+		!byte DBGETSTRING, TXT_LN_X, TXT_LN_3_Y
+		!byte a8L
+		!byte 16
+		!byte CANCEL, DBI_X_2, DBI_Y_2
+DskIcPos	!byte DISK, DBI_X_0, DBI_Y_2
+DrvIcOnOff	!byte DBUSRICON, DBI_X_1, DBI_Y_2
+		!word DrvIcDat
+		!byte NULL
+
+
+ConvDB		!byte DEF_DB_POS | 1
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_1_Y
+		!word ConvDBTxt1
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_2_Y
+		!word ConvDBTxt2
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_3_Y
+		!word ConvDBTxt3
+		!byte YES, DBI_X_0, DBI_Y_2
+		!byte NO, DBI_X_2, DBI_Y_2
+		!byte NULL
+
+ConvDBTxt1	!text BOLDON, "This is a NON-GEOS disk.",0
+ConvDBTxt2	!text "Subdir's won't work on it.",0
+ConvDBTxt3	!text "Convert it?", PLAINTEXT, 0
+
+
+AYS_DB		!byte DEF_DB_POS | 1
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_1_Y
+		!word AYSDBTxt1
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_2_Y
+		!word SubDirName
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_3_Y
+		!word AYSDBTxt2
+		!byte YES, DBI_X_0, DBI_Y_2
+		!byte NO, DBI_X_2, DBI_Y_2
+		!byte NULL
+AYSDBTxt1	!text BOLDON, "Are you sure to remove", PLAINTEXT, 0
+AYSDBTxt2	!text BOLDON, "from this disk ?", PLAINTEXT, 0
+
+
+SDNE_DB		!byte DEF_DB_POS | 1
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_1_Y
+		!word SDTxt1
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_2_Y
+		!word SDTxt2
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_3_Y
+		!word SDTxt3
+		!byte OK, DBI_X_2, DBI_Y_2
+		!byte NULL
+SDTxt1		!text BOLDON, "Subdirectory ", ULINEON, "is not", ULINEOFF, " empty!", PLAINTEXT, 0
+SDTxt2		!text BOLDON, "Please delete all its files.", PLAINTEXT, 0
+SDTxt3		!text BOLDON, "(except '..' subdirectory)", PLAINTEXT, 0
+
+
+Err_DBox	!byte DEF_DB_POS | 1
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_1_Y
+		!word ErrTxt1
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_2_Y
+		!word ErrTxt2
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_3_Y
+		!word ErrTxt3
+		!byte OK, DBI_X_2, DBI_Y_2
+		!byte NULL
+
+ErrTxt1		!text BOLDON, "Error has happened...",PLAINTEXT, NULL
+ErrTxt2		!text BOLDON, "Drive: "
+drvNM		!byte "A", NULL
+
+ErrTxt3		!text "Error #$"
+errNM		!text "00", NULL
+
+
+DD_DB		!byte DEF_DB_POS | 1
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_1_Y
+		!word DDTxt1
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_2_Y
+		!word DDTxt2
+		!byte DBTXTSTR, TXT_LN_X, TXT_LN_3_Y
+		!word DDTxt3
+		!byte OK, DBI_X_2, DBI_Y_2
+		!byte NULL
+DDTxt1		!text BOLDON, "You can't delete this", PLAINTEXT, 0
+DDTxt2		!text BOLDON, "subdirectory! It provides", PLAINTEXT, 0
+DDTxt3		!text BOLDON, "return to the root directory.", PLAINTEXT, 0
+
+MenuTab		!byte 0,14
+		!word 0
+M0X		!word 95
+		!byte 3
+		!word geosText
+		!byte SUB_MENU
+		!word geosMenu
+
+		!word dirText
+		!byte SUB_MENU
+		!word dirMenu
+
+		!word quitText
+		!byte MENU_ACTION
+		!word EnterDeskTop
+
+geosText	!text "geos",NULL
+infoText	!text "GeoMakeDir info",NULL
+switchText	!text PLAINTEXT, "switch 40/80", PLAINTEXT, NULL
+dirText		!text "MakeDir!",NULL
+quitText	!text "quit",NULL
+
+geosMenu
+geosTop		!byte 15
+geosBot		!byte 45
+		!word 0
+M1X		!word 80
+geosNum		!byte 2
+
+		!word infoText
+		!byte MENU_ACTION
+		!word InfoRoutine
+
+		!word switchText
+		!byte MENU_ACTION
+		!word DoSwitch
+
+		!word DASpace
+		!byte MENU_ACTION
+		!word DA_Call0
+
+		!word DASpace+17
+		!byte MENU_ACTION
+		!word DA_Call1
+
+		!word DASpace+2*17
+		!byte MENU_ACTION
+		!word DA_Call2
+
+		!word DASpace+3*17
+		!byte MENU_ACTION
+		!word DA_Call3
+
+		!word DASpace+4*17
+		!byte MENU_ACTION
+		!word DA_Call4
+
+		!word DASpace+5*17
+		!byte MENU_ACTION
+		!word DA_Call5
+
+		!word DASpace+6*17
+		!byte MENU_ACTION
+		!word DA_Call6
+
+		!word DASpace+7*17
+		!byte MENU_ACTION
+		!word DA_Call7
+
+dirMenu		!byte 15,44+28+14
+M2X		!word 28
+M3X		!word 73
+		!byte 5 | VERTICAL
+
+		!word createTxt
+		!byte MENU_ACTION
+		!word DoCreate
+
+		!word removeTxt
+		!byte MENU_ACTION
+		!word DoRemove
+
+		!word renameTxt
+		!byte MENU_ACTION
+		!word DoRename
+
+		!word changeTxt
+		!byte MENU_ACTION
+		!word DoChange
+
+		!word convertTxt
+		!byte MENU_ACTION
+		!word DoConvert
+
+createTxt	!text "create", NULL
+removeTxt	!text "remove", NULL
+renameTxt	!text "rename", NULL
+changeTxt	!text "change", NULL
+convertTxt	!text "convert", NULL
+
+
+ProgExec	jsr DA_Init
+		lda driveType+1
+		bne Prog_Main
+		+LoadB DrvIcOnOff, NULL
+		+LoadB DrvIc2OnOff, NULL
+		+LoadB DskIcPos+1, DBI_X_1
+
+Prog_Main	bit c128Flag
+		bpl GEOS64
+SetMode		bit graphMode
+		bpl MenuOK
+		jsr Set80Col
+		jmp MenuCont
+GEOS64		lda #ITALICON
+		sta switchText
+		jsr Set40Col
+		jmp MenuCont2
+MenuOK		jsr Set40Col
+MenuCont	jsr SetNewMode
+MenuCont2	jsr SetScreen
+		+LoadW r0, MenuTab
+		lda #0
+		jsr DoMenu
+		rts
+
+DA_Init		+LoadB r7L, DESK_ACC
+		+LoadB r7H, maxDesks
+		+LoadW r6, DASpace
+		+LoadW r10,0
+		jsr FindFTypes
+		txa
+		bne DA_InErr
+		lda #maxDesks
+		sec
+		sbc r7H
+		clc
+		adc #2
+		sta a0
+		ora #$80
+		sta geosNum
+		+LoadB a1,14
+		ldx #a0
+		ldy #a1
+		jsr BBMult
+		ldx a0
+		inx
+		txa
+		clc
+		adc geosTop
+		sta geosBot
+		ldx #0
+		rts
+DA_InErr	lda #2 | VERTICAL
+		sta geosNum
+		lda #45
+		sta geosBot
+		rts
+
+InfoRoutine	jsr GotoFirstMenu
+		+LoadW r0, db
+		jsr DoDlgBox
+		lda r0L
+		cmp #OK
+		bne IREnd
+		jmp DoAbout
+IREnd		rts
+
+DoAbout
+		+LoadW r0, About1
+		jmp DoDlgBox
+     
+
+DoSwitch	jsr GotoFirstMenu
+		lda switchText
+		cmp #PLAINTEXT
+		bne Not_C128
+		lda graphMode
+		eor #$80
+		sta graphMode
+		and #$7f
+		eor #$80
+		sta r0L
+		lda $d505
+		and #$7f
+		ora r0L
+		sta $d505
+		jsr SetMode
+Not_C128	rts
+
+Set40Col	lda #95
+		sta M0X
+		lda #80
+		sta M1X
+		lda #28
+		sta M2X
+		lda #73
+		sta M3X
+		+LoadW Ab1, 0
+		+LoadW Ab2, 310
+		lda DrvIcWidth
+		and #$7f
+		sta DrvIcWidth
+		lda LogoWidth
+		and #$7f
+		sta LogoWidth
+		lda LogoXPos
+		and #$7f
+		sta LogoXPos
+		lda Ramka1+1
+		and #$7f
+		sta Ramka1+1
+		lda Ramka2+1
+		and #$7f
+		sta Ramka2+1
+		jsr ClearMouseMode
+		rts
+
+Set80Col	lda #124
+		sta M0X
+		lda #110
+		sta M1X
+		lda #36
+		sta M2X
+		lda #92
+		sta M3X
+		+LoadW Ab1, 120
+		+LoadW Ab2, 540
+		lda DrvIcWidth
+		ora #DOUBLE_B
+		sta DrvIcWidth
+		lda LogoWidth
+		ora #DOUBLE_B
+		sta LogoWidth
+		lda LogoXPos
+		ora #DOUBLE_B
+		sta LogoXPos
+		lda Ramka1+1
+		ora #DOUBLE_B
+		sta Ramka1+1
+		lda Ramka2+1
+		ora #DOUBLE_B
+		sta Ramka2+1
+		jsr ClearMouseMode
+		rts     
+
+SetScreen	lda #2
+		jsr i_Rectangle
+		!byte 0,199
+		!word 0,319 | DOUBLE_W
+		lda #1
+		jsr i_FrameRectangle
+		!byte 99, 100+$50
+Ramka1		!word 3*8-1 | DOUBLE_W
+Ramka2		!word $26*8 | DOUBLE_W
+		!byte $ff
+		jsr i_BitmapUp
+		!word LogoPic
+LogoXPos	!byte 3 | DOUBLE_B
+		!byte 100
+LogoWidth	!byte LogoW | DOUBLE_B
+		!byte LogoH
+		rts
+
+
+DA_Call0	ldx #1
+		bne DA_Call
+DA_Call1	ldx #2
+		bne DA_Call
+DA_Call2	ldx #3
+		bne DA_Call
+DA_Call3	ldx #4
+		bne DA_Call
+DA_Call4	ldx #5
+		bne DA_Call
+DA_Call5	ldx #6
+		bne DA_Call
+DA_Call6	ldx #7
+		bne DA_Call
+DA_Call7	ldx #8
+     
+DA_Call		dex
+		txa
+		tay
+		lda Daty,y
+		clc
+		adc #<DASpace
+		sta r6L
+		lda #0
+		adc #>DASpace
+		sta r6H
+		+MoveW r6, Dane
+		jsr GotoFirstMenu
+		+MoveW Dane, r6
+		+LoadB r0L,0
+		jsr GetFile
+		lda screencolors
+		sta col
+		jsr i_FillRam
+		!word 1000,$8c00
+col		!byte 0
+		jsr i_RecoverRectangle
+		!byte 0,199
+		!word 0,319 | DOUBLE_W
+		jsr ReDoMenu
+		jsr DA_Init
+		rts
+
+
+DoCreate	jsr GotoFirstMenu
+CR_Main		jsr DiskInit
+		+beqx notErr
+		jmp Error
+notErr		+LoadW r0, CR_DBox
+		+LoadB a9L, 0
+		+LoadB SubDirName, 0
+		+LoadW a8, SubDirName
+		jsr DoDlgBox
+		lda a9L
+		beq notChDr
+		jsr ChngDrv
+		jmp CR_Main
+
+notChDr		lda r0L
+		cmp #DISK
+		beq CR_Main
+		cmp #CANCEL
+		bne CR_Cont
+CR_Fin		rts
+
+CR_Cont		lda SubDirName
+		beq CR_Fin
+		+LoadB r3L, 1
+		+LoadB r3H, 0
+		jsr SetNextFree
+		+MoveW r3, a7
+		+MoveW r3, r6
+		jsr AllocateBlock
+		jsr PutDirHead
+		lda a7L
+		sta Track1+1
+		sta Track2+1
+		lda a7H
+		sta Sector1+1
+		sta Sector2+1
+		+LoadW r9, SubDirHeader
+		+LoadB r10, 0
+		jsr SaveFile
+		+beqx CrSvOk
+		jmp Error
+
+CrSvOk		ldx #0
+		txa
+CRLop		sta diskBlkBuf,x
+		inx
+		bne CRLop
+		lda #$ff
+		sta diskBlkBuf+1
+
+		+MoveW fileTrScTab, SubHdrTr
+		+MoveW fileTrScTab+2, SubTr
+		+LoadW r5, diskBlkBuf+2
+		ldy #0
+FlSDLoop	lda SubDane,y
+		sta (r5),y
+		iny
+		cpy #$19
+		bne FlSDLoop
+		ldy #OFF_YEAR
+		ldx #0
+CRCopyDate	lda year,x
+		sta (r5),y
+		inx
+		iny
+		cpy #OFF_SIZE
+		bne CRCopyDate
+		+MoveW a7, r1
+		jsr $903f
+		+MoveW fileTrScTab, r1
+		jsr $903c
+		lda #"T"
+		sta diskBlkBuf+O_GHINFO_TXT
+		jsr $903f
+		jsr DA_Init
+		rts
+
+
+;GetSubDirName - do pobrania nazwy podkatalogu pod SubDirName
+;     x <> 0 - blad, rezygnacja
+
+GetSubDirName	jsr DiskInit
+		+beqx GetnotErr
+		jsr Error
+		ldx #$ff
+		rts
+GetnotErr	+LoadW r0, DR_DBox
+		+LoadB a9L, 0
+		+LoadB SubDirName, 0
+		+LoadW r5, SubDirName
+		+LoadW r10, SubDirClass
+		+LoadW r7L, DESK_ACC
+		jsr DoDlgBox
+		lda a9L
+		beq GetnotChDr
+		jsr ChngDrv
+		jmp GetSubDirName
+GetnotChDr	lda r0L
+		cmp #DISK
+		beq GetSubDirName
+		cmp #CANCEL
+		bne Get_Cont
+Get_Fin		ldx #$ff
+		rts
+Get_Cont	lda SubDirName
+		beq Get_Fin
+		ldx #0
+		rts
+
+GetSDParams	;parametry SubDir'a, in - SubDirName,  x <> 0 - error
+		; SDVers - wersja "0"/"1"
+		; a1, r1 - T&S drugiego katalogu
+		; a2 - T&S kodu  a3 - T&S headera
+
+		+LoadW r6, SubDirName
+		jsr FindFile
+		+bnex GSDPErr
+		+LoadW r9, dirEntryBuf
+		jsr GetFHdrInfo
+		+MoveW r1, a2
+		+MoveW fileTrScTab, a3
+		jsr $903c
+		lda fileHeader+O_GHFNAME+15
+		sta SDVers
+		cmp #"1"
+		beq NewVersion
+		cmp #"2"
+		beq NewVersion
+		lda diskBlkBuf+(Track1+1-DirMove)+2-5
+		sta a1L
+		lda diskBlkBuf+(Sector1+1-DirMove)+2-5
+		jmp GSDPEnd
+NewVersion	lda diskBlkBuf+(Track1+1-DirMove)+2
+		sta a1L
+		lda diskBlkBuf+(Sector1+1-DirMove)+2
+GSDPEnd		sta a1H
+		+MoveW a1, r1
+GSDPErr		rts
+
+DiskInit	jsr OpenDisk
+		+bnex DskInErr
+		jsr TstGEOSDsk
+		jsr DA_Init
+		+bnex DskInErr
+		ldx #a0
+		jsr GetPtrCurDkNm
+		ldy #0
+DskInLp0	lda (a0),y
+		cmp #$a0
+		beq DskInLp1
+		sta DiskName,y
+		iny
+		cpy #16
+		bne DskInLp0
+DskInLp1	lda #0
+		sta DiskName,y
+		tax
+DskInErr	rts
+
+ChngDrv		ldx curDrive
+		inx
+		cpx #13
+		bne ChDrOK
+		ldx #8
+ChDrOK		lda driveType-8,x
+		bne ChDrCnt
+		ldx #8
+ChDrCnt		txa
+		jsr SetDevice
+		rts
+
+DoRemove	jsr GotoFirstMenu
+DR_Main		jsr GetSubDirName
+		+beqx DR_Cont
+DR_Fin		rts
+DR_Cont		lda SubDirName+2
+		bne DR_Cont2
+		lda #"."
+		cmp SubDirName
+		bne DR_Cont2
+		cmp SubDirName+1
+		bne DR_Cont2
+		jmp DontDel
+DR_Cont2	jsr AreYouSure
+		bcs DR_Main
+		jsr GetSDParams
+		+bnex DR_Fin
+		jsr $903c
+		+beqx DR_Nerr2
+		jmp Error
+DR_Nerr2	jsr TestSubDEmpty
+		bcc DR_ok
+		rts
+
+DR_ok		jsr SDDDel
+		+beqx DR_Nerr3
+		jmp Error
+DR_Nerr3	jsr PutDirHead
+		+beqx DR_Nerr31
+		jmp Error
+DR_Nerr31	+LoadW r0, SubDirName
+		jsr DeleteFile
+		+beqx DR_Nerr4
+		jmp Error
+DR_Nerr4	jsr PutDirHead
+		jsr DA_Init
+		rts
+
+DoRename	jsr GotoFirstMenu
+		jsr GetSubDirName
+		+beqx DRen_OK
+DRen_Fin	rts
+DRen_OK		lda #"."
+		cmp SubDirName
+		bne DRen_Cont
+		cmp SubDirName+1
+		bne DRen_Cont
+		jmp DontRen
+DRen_Cont	ldy #0
+DRen_Lp		lda SubDirName,y
+		sta NewDirName,y
+		iny
+		cpy #17
+		bne DRen_Lp
+		+LoadW r0, DRen_DBox
+		+LoadW a8, NewDirName
+		jsr DoDlgBox
+		lda r0L
+		cmp #CANCEL
+		beq DRen_Fin
+		+LoadW r0, NewDirName
+		+LoadW r6, SubDirName
+		jsr RenameFile
+		jsr DA_Init
+		rts
+
+DontRen		+LoadW r0, DRen_DB
+		jsr DoDlgBox
+		rts
+
+
+DoChange	jsr GotoFirstMenu
+DChg_Main	jsr GetSubDirName
+		+beqx DChg_Cont
+DChg_Fin	rts
+DChg_Cont	jsr GetSDParams
+		+bnex DChg_Fin
+		+LoadB r1L, 18
+		+LoadB r1H, 1
+		+LoadW r4, curDirHead
+		jsr GetBlock
+		+MoveW a1, r1
+		+LoadW r4, diskBlkBuf
+		jsr GetBlock
+		+MoveW a1, r1
+		+LoadW r4, curDirHead
+		jsr PutBlock
+		+LoadB r1L, 18
+		+LoadB r1H, 1
+		+LoadW r4, diskBlkBuf
+		jsr PutBlock
+		jsr GetDirHead
+		jsr DA_Init
+		rts
+
+DoConvert	jsr GotoFirstMenu
+DCon_Main	jsr GetSubDirName
+		+beqx DCon_Cont
+DCon_Fin	rts
+DCon_Cont	jsr GetSDParams
+		+bnex DCon_Fin
+		lda SDVers
+		cmp #"0"
+		beq DCon_Cont2
+		jmp NotV20
+DCon_Cont2	lda a1L
+		sta Track1+1
+		sta Track2+1
+		lda a1H
+		sta Sector1+1
+		sta Sector2+1
+		ldx #0
+		stx diskBlkBuf
+DCon_Lp0	lda DirMove,x
+		sta diskBlkBuf+2,x
+		inx
+		cpx #<DirMoveEnd-DirMove+1
+		bne DCon_Lp0
+		stx diskBlkBuf+1
+		+MoveW a2, r1
+		jsr $903f
+		ldx #2
+DCon_Lp1	lda SubDirHeader,x
+		sta diskBlkBuf,x
+		inx
+		bne DCon_Lp1
+		+MoveW a3, r1
+		jsr $903f
+		+LoadW r6, SubDirName
+		jsr FindFile
+		ldy #0
+		lda (r5),y
+		ora #$40
+		sta (r5),y
+		ldy #OFF_YEAR
+		ldx #0
+Con_CpDt	lda year,x
+		sta (r5),y
+		inx
+		iny
+		cpy #OFF_SIZE
+		bne Con_CpDt
+		jsr $903f
+		rts
+
+NotV20		+LoadW r0, NtV20Par
+		jsr DoDlgBox
+		rts
+
+
+DoDrvIc		lda #1
+		sta a9L
+		jmp RstrFrmDialogue
+
+
+TestSubDEmpty	+LoadW r5, diskBlkBuf+2
+		lda #$20
+		bne TSDCheck
+TSDMain		lda #0
+TSDCheck	tay
+		lda (r5),y
+		and #%11110000
+		bne TSDCosJest
+		tya
+		clc
+		adc #$20
+		bcc TSDCheck
+		lda diskBlkBuf
+		beq TSDEndOK
+		sta r1L
+		lda diskBlkBuf+1
+		sta r1H
+		jsr $903c
+		jmp TSDMain
+TSDCosJest	jsr SDNotEmpty
+		sec
+		rts
+TSDEndOK	clc
+		rts
+
+SDDDel		+MoveW a1, r1
+		+LoadW r3, fileTrScTab
+		jsr FollowChain
+		ldy #0
+SDDDMain	lda fileTrScTab,y
+		beq SDDDEnd
+		sta r6L
+		lda fileTrScTab+1,y
+		sta r6H
+		jsr FreeBlock
+		txa
+		bne SDDDEnd
+		iny
+		iny
+		jmp SDDDMain
+SDDDEnd		rts
+
+TstGEOSDsk	lda isGEOS
+		bne TstOK
+		+LoadW r0, ConvDB
+		jsr DoDlgBox
+		lda r0L
+		cmp #NO
+		beq TstOK
+		jsr SetGEOSDisk 
+TstOK		rts
+
+
+AreYouSure	+LoadW r0, AYS_DB
+		jsr DoDlgBox
+		lda r0L
+		cmp #YES
+		beq AYS_Y
+		sec
+		rts
+AYS_Y		clc
+		rts
+
+
+SDNotEmpty	+LoadW r0, SDNE_DB
+		jsr DoDlgBox
+		rts
+
+
+Error		txa
+		pha
+		lda curDrive
+		and #%00000011
+		clc
+		adc #"A"
+		sta drvNM
+		pla
+		jsr calcHex
+		+MoveW cyfra, errNM
+		+LoadW r0, Err_DBox
+		jsr DoDlgBox
+		jsr DA_InErr
+		rts
+calcHex		ldy #1
+		pha
+		jsr pxdig
+		pla
+		lsr
+		lsr
+		lsr
+		lsr
+pxdig		and #%00001111
+		ora #"0"
+		cmp #"9"+1
+		bcc clcHx
+		adc #6
+clcHx		sta cyfra, y
+		dey
+		rts
+cyfra		!word 0
+
+
+DontDel		+LoadW r0, DD_DB
+		jsr DoDlgBox
+		rts
+
+
+DirMove		bit $c013
+		bmi DirCont
+		+LoadW r6, dirEntryBuf+OFF_FNAME
+		+LoadB dirEntryBuf+$10, 0
+		jsr FindFile
+		ldy #0
+		tya
+		sta (r5),y
+		jsr $903f
+		+MoveW curDirHead+OFF_OP_TR_SC, r1
+		jsr $903c
+		ldx #0
+Loop		lda dirEntryBuf,x
+		sta diskBlkBuf+$e2,x
+		inx
+		cpx #$1e
+		bne Loop
+		jsr $903f
+DirCont		+LoadB r1L, 18
+		+LoadB r1H, 1
+		+LoadW r4, curDirHead
+		jsr GetBlock
+Track1		lda #1
+		sta r1L
+Sector1		lda #0
+		sta r1H
+		+LoadW r4, diskBlkBuf
+		jsr GetBlock
+Track2		lda #1
+		sta r1L
+Sector2		lda #0
+		sta r1H
+		+LoadW r4, curDirHead
+		jsr PutBlock
+		+LoadB r1L, 18
+		+LoadB r1H, 1
+		+LoadW r4, diskBlkBuf
+		jsr PutBlock
+		jsr GetDirHead
+		+LoadW appMain, RstrAppl
+		rts
+DirMoveEnd

@@ -1,0 +1,168 @@
+; GEOS .cvt header for ACME v0.07
+; by Maciej 'YTM/Alliance' Witkowiak
+; 21.10.1999
+
+; 29.11.1999
+
+;-----------------------------------------------------------------------
+
+!cpu 6502
+!to "bootprotrmv.cvt"				;*change this!
+
+!source "inc/const.inc"
+!source "inc/diskdrv.inc"
+!source "inc/geosmac.acme.inc"
+!source "inc/geossym.inc"
+!source "inc/geossym2.inc"
+!source "inc/inputdrv.inc"
+!source "inc/jumptab.inc"
+!source "inc/printdrv.inc"
+
+;Now select some values:
+
+;base address for your program:
+
+ProgStart		= APP_RAM		;*APP_RAM is good for applications
+
+;execution address of your program:
+;ProgExec		= ProgStart		;*this should be defined in
+						;source file, otherwise uncomment
+						;this and your app will be
+						;executed from its first byte
+
+ProgType		= DESK_ACC		;*GEOS executable filetype
+
+;may be one of the:	  ASSEMBLY
+			; DESK_ACC
+			; APPLICATION
+			; PRINTER
+			; INPUT_DEVICE
+			; AUTO_EXEC
+			; INPUT_128
+			
+;-----------------------------------------------------------------------
+
+			!zone DOS_Header
+
+			*=(USR | $80)		;DOS filetype and track #
+			!byte NULL		;sector #
+			
+;if ACME wouldn't insist on putting loadaddress it could be done this way:
+			;!byte USR | $80
+			;!word 0
+			
+			!subzone DOS_filename {
+			
+		.tmp=*
+			!text "BootStampRmv"	;*DOS filename (up to 16 chars)
+			!fill ((.tmp+16)-*),$a0	;name padding
+			}
+
+			!word NULL		;header T&S, also ignored
+			
+			!byte SEQUENTIAL	;file structure, as for now
+						;this template only supports
+						;SEQUENTIAL files
+						
+			!byte ProgType		;GEOS filetype
+			!byte 99		;*year
+			!byte 11		;*month
+			!byte 29		;*day
+			!byte 17		;*hour
+			!byte 27		;*minute
+			
+			!word NULL		;size in blocks, should be
+						;fixed by converter
+						
+			!text "PRG formatted GEOS file V1.0"
+						;stamp
+						
+			*=*+$c4			;some zeroes
+			
+			!zone GEOS_Header
+			
+			;here comes file header
+			
+			!byte 3,21		;size of icon (x*8,y)
+			!byte 63 | $80		;packer control character
+			
+			;like hardcore? edit icon here! ;)
+			
+			!byte %########, %########, %########
+			!byte %#......., %........, %.......#
+			!byte %#......., %........, %.......#
+			!byte %#......., %........, %.......#
+			!byte %#......., %........, %.......#
+			!byte %#......., %........, %.......#
+			!byte %#......., %........, %.......#
+			!byte %#......., %........, %.......#
+			!byte %#......., %........, %.......#
+			!byte %#......., %........, %.......#
+			!byte %#......., %........, %.......#
+			!byte %#......., %........, %.......#
+			!byte %#......., %........, %.......#
+			!byte %#......., %........, %.......#
+			!byte %#......., %........, %.......#
+			!byte %#......., %........, %.......#
+			!byte %#......., %........, %.......#
+			!byte %#......., %........, %.......#
+			!byte %#......., %........, %.......#
+			!byte %#......., %........, %.......#
+			!byte %########, %########, %########
+			
+			!byte USR | $80		;again DOS type
+			!byte ProgType		;again GEOS type
+			!byte SEQUENTIAL	;again structure
+			!word ProgStart		;load address
+			!word ProgEnd		;end address (essencial for DESK_ACC)
+			!word ProgExec		;execute address
+			
+			!subzone GEOSClass {
+			
+		.tmp=*
+			!text "BootStmpRmv"	;*class name (up to 12 chars)
+			!fill ((.tmp+12)-*),$20	;name padding
+			}
+			
+			!text "V1.0"		;*version number ('V',major,'.',minor)
+			!byte NULL		;string termination
+			
+			!word NULL
+
+			!byte %01000000		;*40/80 columns capability
+			
+;B7 B6
+; 0  0  - runs under 128 GEOS, but in 40 column mode only
+; 0  1  - runs under 128 GEOS in 40 and 80 column modes
+; 1  0  - DOES NOT RUN under 128 GEOS (deskTop will display dialog box)
+; 1  1  - runs under 128 GEOS in 80 column mode only
+
+			!subzone GEOSAuthor	{
+		.tmp=*
+			!text "Maciej Witkowiak";*author's name (up to 63 chars)
+			!byte NULL		;string termination
+			
+			!fill ((.tmp+63)-*),$00	;name padding
+			}
+
+			!subzone GEOSNote	{
+		.tmp=*
+			!text "Removes bootstamp from"
+			!byte 13
+			!text "bootdisks."
+			!byte NULL		;string termination
+			!fill ((.tmp+96)-*),$00 ;header padding
+			}
+
+			!zone SourceCode			
+			!pseudopc ProgStart
+			
+;-----------------------------------------------------------------------
+
+!source "bootprotrmv.tas"			;*file with source code of your
+
+ProgEnd	= *+1					;this label have to be at the end
+;-----------------------------------------------------------------------
+
+			!realpc
+			
